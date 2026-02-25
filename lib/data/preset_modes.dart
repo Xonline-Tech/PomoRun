@@ -1,0 +1,92 @@
+import '../models/mode.dart';
+import '../models/prompt_policy.dart';
+
+class PresetModes {
+  static final List<ModeConfig> all = <ModeConfig>[
+    ModeConfig(
+      id: 'easy_jog',
+      name: '轻松慢跑',
+      kind: ModeKind.steady,
+      feel: '能正常聊天，不喘',
+      defaultDuration: const Duration(minutes: 30),
+      defaultBpm: 160,
+      minBpm: 140,
+      maxBpm: 180,
+      suitableFor: '新手、减脂、养生、恢复跑',
+      voiceRule: '每五分钟提醒 + 鼓励',
+      notes: '步幅小，不追求快',
+      promptPolicy: PromptPolicy.encourageEveryFiveMinutes,
+      intervalTemplate: null,
+    ),
+    ModeConfig(
+      id: 'interval',
+      name: '间歇跑',
+      kind: ModeKind.interval,
+      feel: '冲刺时很累，间歇能缓过来',
+      defaultDuration: const Duration(minutes: 10),
+      defaultBpm: 200,
+      minBpm: 180,
+      maxBpm: 220,
+      suitableFor: '想高效减脂、提升体能',
+      voiceRule: '快跑 30s + 慢跑 1.5min；每次切换前十秒提醒 + 鼓励',
+      notes: '热身必须足，不天天练',
+      promptPolicy: PromptPolicy.intervalTenSecondsBeforeSwitch,
+      intervalTemplate: const IntervalTemplate(
+        sets: 5,
+        fastDuration: Duration(seconds: 30),
+        fastBpm: 200,
+        recoveryDuration: Duration(seconds: 90),
+        recoveryBpm: 130,
+      ),
+    ),
+    ModeConfig(
+      id: 'steady_long',
+      name: '稳态长跑',
+      kind: ModeKind.steady,
+      feel: '全程舒服稳定，微喘',
+      defaultDuration: const Duration(minutes: 60),
+      defaultBpm: 170,
+      minBpm: 150,
+      maxBpm: 185,
+      suitableFor: '练耐力、5km/10km 进阶',
+      voiceRule: '每五分钟提醒 + 鼓励',
+      notes: '补水，配速别越跑越快',
+      promptPolicy: PromptPolicy.encourageEveryFiveMinutes,
+      intervalTemplate: null,
+    ),
+    ModeConfig(
+      id: 'tempo',
+      name: '节奏跑',
+      kind: ModeKind.steady,
+      feel: '有点累，但能坚持到底',
+      defaultDuration: const Duration(minutes: 15),
+      defaultBpm: 185,
+      minBpm: 170,
+      maxBpm: 200,
+      suitableFor: '想提速、突破瓶颈',
+      voiceRule: '剩余 5 分钟、1 分钟提醒',
+      notes: '不要当成冲刺跑',
+      promptPolicy: PromptPolicy.tempoRemainingFiveAndOne,
+      intervalTemplate: null,
+    ),
+    ModeConfig(
+      id: 'super_slow',
+      name: '超慢跑',
+      kind: ModeKind.steady,
+      feel: '几乎不喘，像“颠着走”',
+      defaultDuration: const Duration(minutes: 40),
+      defaultBpm: 150,
+      minBpm: 130,
+      maxBpm: 170,
+      suitableFor: '大体重、怕伤膝、长期减脂',
+      voiceRule: '每五分钟提醒 + 鼓励',
+      notes: '步幅极小，落地轻',
+      promptPolicy: PromptPolicy.encourageEveryFiveMinutes,
+      intervalTemplate: null,
+    ),
+  ];
+
+  static ModeConfig byId(String id) {
+    return all.firstWhere((m) => m.id == id);
+  }
+}
