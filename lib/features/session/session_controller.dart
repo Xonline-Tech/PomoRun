@@ -55,19 +55,22 @@ class SessionController extends ChangeNotifier {
   final int _configuredBpm;
   final Duration _configuredDuration;
 
-  SessionState _state;
+  late SessionState _state;
   SessionState get state => _state;
 
   int get configuredBpm => _configuredBpm;
   Duration get configuredDuration => _configuredDuration;
-  Duration get _totalDuration => mode.kind == ModeKind.interval ? _sumSegments(_segments) : _configuredDuration;
+  Duration get _totalDuration => mode.kind == ModeKind.interval
+      ? _sumSegments(_segments)
+      : _configuredDuration;
 
   List<Segment> get segments => List<Segment>.unmodifiable(_segments);
 
   void start() {
     if (_state.status == SessionStatus.running) return;
 
-    if (_state.status == SessionStatus.idle || _state.status == SessionStatus.finished) {
+    if (_state.status == SessionStatus.idle ||
+        _state.status == SessionStatus.finished) {
       _reset();
     }
 
@@ -83,6 +86,7 @@ class SessionController extends ChangeNotifier {
     _state = _state.copyWith(status: SessionStatus.running);
     notifyListeners();
 
+    unawaited(_tickPlayer.prime());
     _startSegmentMetronome(_state.currentSegment);
     _startUiTick();
   }
@@ -143,7 +147,8 @@ class SessionController extends ChangeNotifier {
     _stopwatch
       ..stop()
       ..reset();
-    _segments = mode.buildSegments(bpm: _configuredBpm, totalDuration: _configuredDuration);
+    _segments = mode.buildSegments(
+        bpm: _configuredBpm, totalDuration: _configuredDuration);
     final first = _segments.first;
     _state = SessionState(
       status: SessionStatus.idle,
@@ -175,7 +180,8 @@ class SessionController extends ChangeNotifier {
 
     var segmentIndex = _state.segmentIndex;
     var segmentElapsed = _computeSegmentElapsed(safeElapsed, segmentIndex);
-    while (segmentIndex < _segments.length && segmentElapsed >= _segments[segmentIndex].duration) {
+    while (segmentIndex < _segments.length &&
+        segmentElapsed >= _segments[segmentIndex].duration) {
       segmentIndex++;
       if (segmentIndex >= _segments.length) {
         _state = _state.copyWith(
@@ -193,7 +199,8 @@ class SessionController extends ChangeNotifier {
     }
 
     final current = _segments[segmentIndex];
-    final segmentRemaining = _clampNonNegative(current.duration - segmentElapsed);
+    final segmentRemaining =
+        _clampNonNegative(current.duration - segmentElapsed);
 
     _state = _state.copyWith(
       totalElapsed: safeElapsed,
@@ -205,7 +212,9 @@ class SessionController extends ChangeNotifier {
     );
     notifyListeners();
 
-    final nextLabel = segmentIndex + 1 < _segments.length ? _segments[segmentIndex + 1].label : '结束';
+    final nextLabel = segmentIndex + 1 < _segments.length
+        ? _segments[segmentIndex + 1].label
+        : '结束';
     final event = _prompts.update(
       policy: mode.promptPolicy,
       totalElapsed: safeElapsed,
@@ -235,14 +244,16 @@ class SessionController extends ChangeNotifier {
     _metronome?.stop();
     _metronome = MetronomeEngine(
       bpm: segment.bpm,
-      onBeat: (beatIndex) async {
+      onBeat: (beatIndex) {
         if (_state.status != SessionStatus.running) return;
+
+        final isAccent = beatIndex % 4 == 0;
+
         if (_state.soundEnabled) {
-          if (beatIndex == 0) {
-            await _tickPlayer.accent();
-          } else {
-            await _tickPlayer.tick();
-          }
+          unawaited(isAccent ? _tickPlayer.accent() : _tickPlayer.tick());
+        }
+        if (_state.hapticsEnabled) {
+          unawaited(_haptics.shortPulse());
         }
       },
     )..start();

@@ -8,11 +8,19 @@ class HapticsService {
 
   Future<void> shortPulse() async {
     if (!await hasVibrator) return;
-    await Vibration.vibrate(duration: 25, amplitude: 96);
+    try {
+      await Vibration.vibrate(duration: 25);
+    } catch (_) {
+      // Ignore haptics failures on unsupported devices.
+    }
   }
 
   Future<void> doublePulse() async {
     if (!await hasVibrator) return;
-    await Vibration.vibrate(pattern: <int>[0, 30, 50, 40], amplitudes: <int>[0, 128, 0, 160]);
+    try {
+      await Vibration.vibrate(pattern: <int>[0, 30, 50, 40]);
+    } catch (_) {
+      // Ignore haptics failures on unsupported devices.
+    }
   }
 }

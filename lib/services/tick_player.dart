@@ -1,13 +1,3 @@
-import 'package:flutter/services.dart';
-
-class TickPlayer {
-  Future<void> tick() async {
-    await SystemSound.play(SystemSoundType.click);
-  }
-
-  Future<void> accent() async {
-    await SystemSound.play(SystemSoundType.click);
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-    await SystemSound.play(SystemSoundType.click);
-  }
-}
+export 'tick_player_stub.dart'
+    if (dart.library.html) 'tick_player_web.dart'
+    if (dart.library.io) 'tick_player_io.dart';
