@@ -84,7 +84,7 @@ MVP 的核心闭环：
 - `lib/models/`
   - `mode.dart`（模式配置结构）
   - `segment.dart`（分段结构）
-  - `prompt_rule.dart`（提醒规则结构）
+  - `prompt_policy.dart`（提醒策略枚举）
 - `lib/features/modes/`
   - `mode_list_page.dart`
   - `mode_detail_page.dart`
@@ -94,9 +94,10 @@ MVP 的核心闭环：
 - `lib/services/`
   - `metronome_engine.dart`（节拍器引擎）
   - `prompt_engine.dart`（提醒引擎）
-  - `audio_tick_player.dart`（tick 播放器封装）
+  - `tick_player.dart`（tick 播放器封装；分平台实现，优先保证“能听见”）
+  - `beep_wav.dart`（运行时生成短 wav 蜂鸣，供 Web/桌面使用）
   - `haptics.dart`（振动封装）
-  - `tts.dart`（TTS 封装）
+  - `tts_service.dart`（TTS 封装）
 - `lib/ui/`
   - `theme.dart`、`widgets/`（MVP 可非常精简）
 
@@ -122,9 +123,10 @@ MVP 的核心闭环：
 
 ### 6.3 振动默认策略
 
-- 默认不跟随每拍振动
-- 只在“分段切换/语音提醒”触发振动
-- 可选提供更强提醒：每 4 拍短震一次
+- 默认关闭振动（避免 180-200bpm 过度打扰）
+- 开启振动后：
+  - 每拍短震（用于“跟拍”）
+  - 分段切换时双震（更明确的提示）
 
 ## 7. 提醒规则（MVP）
 
@@ -138,15 +140,26 @@ MVP 的核心闭环：
 ## 8. 平台行为说明（写进 App 内说明或 README）
 
 - iOS 静音模式下提示音可能不可听；可开启振动/语音或关闭静音
+- Web 端受浏览器自动播放策略限制：必须有用户交互（点击开始）后才允许出声
 - MVP 默认前台运行；锁屏/后台稳定提示不承诺
 
 ## 9. 依赖建议（pubspec）
 
 MVP 推荐：
 
-- `soundpool`：短音 tick（低延迟）
 - `flutter_tts`：语音提醒
 - `vibration`：振动
+
+MVP 当前实现：
+
+- tick：
+  - Android：原生 `ToneGenerator`（MethodChannel）
+  - Web/桌面：运行时生成短 `wav` 蜂鸣并播放（`audioplayers`）
+  - 兜底：系统 `SystemSound.click`
+
+后续优化（可选）：
+
+- `soundpool`：换成更低延迟的短音 tick（需要自带 wav 资源）
 
 备选：
 

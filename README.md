@@ -22,38 +22,50 @@
 ## 技术栈（Flutter）
 
 - Flutter（Dart）
-- 音频短提示音：优先 `soundpool`（低延迟短音）；备选 `just_audio`
+- tick（节拍提示音）：
+  - Android：原生 `ToneGenerator`（通过 `MethodChannel` 调用，延迟更低、更稳定）
+  - Web/桌面：运行时生成短 `wav` 蜂鸣并播放（`audioplayers`）
+  - 兜底：系统 `SystemSound.click`
 - 振动：`vibration`
 - 语音提醒：`flutter_tts`
 - 状态管理：MVP 使用 `ChangeNotifier` / `ValueNotifier`
 
-## 快速开始（本地创建项目）
+## 快速开始
 
-本仓库已包含 MVP 的 `lib/` 代码与 `pubspec.yaml`，但当前目录未包含 `android/ios` 等平台工程文件。
-
-建议做法（任选其一）：
-
-1) 在本仓库根目录执行 `flutter create .` 生成平台目录（如提示冲突，优先保留本仓库已有 `lib/` 代码）。
-2) 新建一个 Flutter 工程，然后把本仓库的 `lib/`、`pubspec.yaml`、`docs/` 拷贝进去。
-
-1) 创建 Flutter 工程
+本仓库已是完整 Flutter 工程。
 
 ```bash
-flutter create pomorun
-cd pomorun
+flutter pub get
+flutter run
 ```
 
-2) 把本仓库的 `lib/`、`pubspec.yaml`、`docs/` 和 `AGENTS.md` 复制进工程根目录。
+编译 APK：
 
-3) 按 `docs/MVP.md` 开始实现。
+```bash
+flutter build apk --release
+```
+
+产物默认在：`build/app/outputs/flutter-apk/app-release.apk`。
+
+生成 App 图标（Android/iOS/Web/桌面各自会有输出）：
+
+```bash
+dart run flutter_launcher_icons
+```
 
 ## 文档
 
 - `docs/MVP.md`：MVP 需求、页面、模块、实现要点
 - `docs/Modes.md`：预设模式配置与“脚本化分段”定义
+- `docs/Run.md`：运行、编译 APK、常见卡住问题处理
 
 ## 下一步建议
 
 1) 先实现“模式选择 -> 会话页 -> 节拍器 tick”完整闭环
 2) 再接入语音/振动提醒
 3) 最后做最小可用的完成记录与（可选）简单勋章
+
+## 平台说明
+
+- Web：浏览器有自动播放限制，必须用户点击“开始训练”后才允许出声；若仍无声请检查浏览器站点音频权限/标签页是否静音。
+- Android：需要 `VIBRATE` 权限；会话页右上角可分别开关“声音/语音/振动”。
