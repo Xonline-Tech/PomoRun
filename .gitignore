@@ -4,6 +4,13 @@
 build/
 pubspec.lock
 
+# Flutter generated
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Logs
+*.log
+
 # Android
 android/.gradle/
 android/local.properties
@@ -15,3 +22,4 @@ ios/.symlinks/
 # IDE
 .idea/
 .vscode/
+*.iml
