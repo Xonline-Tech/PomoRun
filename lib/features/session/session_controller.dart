@@ -51,6 +51,7 @@ class SessionController extends ChangeNotifier {
   final Stopwatch _stopwatch = Stopwatch();
   Duration _pausedAccumulated = Duration.zero;
   Duration _pauseStartedAt = Duration.zero;
+  DateTime? _startedAt;
 
   final int _configuredBpm;
   final Duration _configuredDuration;
@@ -60,6 +61,7 @@ class SessionController extends ChangeNotifier {
 
   int get configuredBpm => _configuredBpm;
   Duration get configuredDuration => _configuredDuration;
+  DateTime? get startedAt => _startedAt;
   Duration get _totalDuration => mode.kind == ModeKind.interval
       ? _sumSegments(_segments)
       : _configuredDuration;
@@ -72,6 +74,7 @@ class SessionController extends ChangeNotifier {
     if (_state.status == SessionStatus.idle ||
         _state.status == SessionStatus.finished) {
       _reset();
+      _startedAt = DateTime.now();
     }
 
     if (_state.status == SessionStatus.paused) {
